@@ -11,6 +11,7 @@ import {
   Cluster,
   KpiRow,
   Section,
+  SectionHeader,
   BodyText,
   MetaText,
   Surface,
@@ -23,35 +24,35 @@ import { KPIData } from '@/components/ui/kpi-data'
 import { StatusIndicator } from '@/components/ui/status-indicator'
 import { Alert } from '@/components/ui/alert'
 import { DropdownField } from '@/components/ui/dropdown-field'
+import { SideSheet } from '@/components/ui/side-sheet'
+import { InputField } from '@/components/ui/input-field'
 import {
   DashboardOutline,
   SwapHorizOutline,
   WarningOutline,
   CheckCircleOutline,
   ErrorOutline,
+  SearchOutline,
 } from '@/components/ui/icons'
 import { countryOptions } from '@/data/countries'
 import { semantic, spacing } from '@/lib/tokens'
+
+// ─── Nav ──────────────────────────────────────────────────────────────────────
 
 const navGroups: SideNavGroup[] = [
   {
     id: 'main',
     items: [
-      {
-        id: 'overview',
-        label: 'Menu Overview',
-        icon: <DashboardOutline />,
-        href: '/tools/recipe-pool-picker',
-      },
+      { id: 'overview', label: 'Menu Overview', icon: <DashboardOutline />, href: '/tools/recipe-pool-picker' },
     ],
   },
 ]
 
 const navUser: SideNavUser = {
-  name: 'Anna Fischer',
-  role: 'Menu Planner',
-  email: 'anna.fischer@hellofresh.com',
+  name: 'Anna Fischer', role: 'Menu Planner', email: 'anna.fischer@hellofresh.com',
 }
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type SlotHealth = 'ok' | 'warning' | 'error'
 
@@ -72,6 +73,25 @@ interface ProteinGroup {
   slots: RecipeSlot[]
 }
 
+type CandidateConstraint = 'ok' | 'warning' | 'error'
+type CandidateSku        = 'ok' | 'warning' | 'error'
+
+interface PoolCandidate {
+  id: string
+  name: string
+  protein: string
+  cuisine: string
+  costPerServing: string
+  costDelta: string
+  costDeltaDir: 'up' | 'down' | 'neutral'
+  constraintStatus: CandidateConstraint
+  skuStatus: CandidateSku
+  constraintNote?: string
+  skuNote?: string
+}
+
+// ─── Mock data ────────────────────────────────────────────────────────────────
+
 const WEEK_OPTIONS = [
   { label: 'W28 2026 (Jul 7–13)',     value: 'w28' },
   { label: 'W29 2026 (Jul 14–20)',    value: 'w29' },
@@ -91,8 +111,8 @@ const PROTEIN_GROUPS: ProteinGroup[] = [
   {
     label: 'Chicken',
     slots: [
-      { id: 's4', slotLabel: 'Slot 4', recipeName: 'Chicken Tikka Masala',       cuisine: 'Indian',         costPerServing: '€4.10', constraintStatus: 'ok', skuStatus: 'ok' },
-      { id: 's5', slotLabel: 'Slot 5', recipeName: 'Lemon Herb Roast Chicken',   cuisine: 'Mediterranean',  costPerServing: '€3.92', constraintStatus: 'ok', skuStatus: 'ok' },
+      { id: 's4', slotLabel: 'Slot 4', recipeName: 'Chicken Tikka Masala',     cuisine: 'Indian',        costPerServing: '€4.10', constraintStatus: 'ok', skuStatus: 'ok' },
+      { id: 's5', slotLabel: 'Slot 5', recipeName: 'Lemon Herb Roast Chicken', cuisine: 'Mediterranean', costPerServing: '€3.92', constraintStatus: 'ok', skuStatus: 'ok' },
     ],
   },
   {
@@ -105,8 +125,8 @@ const PROTEIN_GROUPS: ProteinGroup[] = [
   {
     label: 'Vegetarian',
     slots: [
-      { id: 's8', slotLabel: 'Slot 8', recipeName: 'Mushroom & Spinach Risotto',  cuisine: 'Italian',        costPerServing: '€3.55', constraintStatus: 'ok',      skuStatus: 'ok' },
-      { id: 's9', slotLabel: 'Slot 9', recipeName: 'Halloumi & Roasted Veg Wrap', cuisine: 'Mediterranean',   costPerServing: '€3.80', constraintStatus: 'warning', skuStatus: 'ok', constraintNote: 'Vegetarian slot target: 3 required, currently 2' },
+      { id: 's8', slotLabel: 'Slot 8', recipeName: 'Mushroom & Spinach Risotto',  cuisine: 'Italian',       costPerServing: '€3.55', constraintStatus: 'ok',      skuStatus: 'ok' },
+      { id: 's9', slotLabel: 'Slot 9', recipeName: 'Halloumi & Roasted Veg Wrap', cuisine: 'Mediterranean',  costPerServing: '€3.80', constraintStatus: 'warning', skuStatus: 'ok', constraintNote: 'Vegetarian slot target: 3 required, currently 2' },
     ],
   },
   {
@@ -117,25 +137,42 @@ const PROTEIN_GROUPS: ProteinGroup[] = [
   },
 ]
 
+// Pool candidates shown in the SideSheet — filtered to same protein as the swapped slot
+const POOL_CANDIDATES: PoolCandidate[] = [
+  { id: 'p1', name: 'Smoky Beef Chilli',         protein: 'Beef', cuisine: 'American',  costPerServing: '€4.20', costDelta: '−€0.25', costDeltaDir: 'down',    constraintStatus: 'ok',      skuStatus: 'ok' },
+  { id: 'p2', name: 'Beef & Mushroom Stir Fry',  protein: 'Beef', cuisine: 'Asian',     costPerServing: '€4.55', costDelta: '+€0.10', costDeltaDir: 'up',      constraintStatus: 'ok',      skuStatus: 'ok' },
+  { id: 'p3', name: 'Beef Ragu Pappardelle',      protein: 'Beef', cuisine: 'Italian',  costPerServing: '€5.00', costDelta: '+€0.55', costDeltaDir: 'up',      constraintStatus: 'warning', skuStatus: 'ok', constraintNote: 'Calorie-smart borderline' },
+  { id: 'p4', name: 'Classic Beef Burger',        protein: 'Beef', cuisine: 'American', costPerServing: '€4.30', costDelta: '−€0.15', costDeltaDir: 'down',    constraintStatus: 'ok',      skuStatus: 'ok' },
+  { id: 'p5', name: 'Beef Bibimbap Bowl',         protein: 'Beef', cuisine: 'Korean',   costPerServing: '€4.80', costDelta: '+€0.35', costDeltaDir: 'up',      constraintStatus: 'ok',      skuStatus: 'warning', skuNote: 'Gochujang SKU at 68%' },
+  { id: 'p6', name: 'Beef & Broccoli Noodles',   protein: 'Beef', cuisine: 'Asian',     costPerServing: '€4.10', costDelta: '−€0.35', costDeltaDir: 'down',    constraintStatus: 'ok',      skuStatus: 'ok' },
+]
+
+// ─── KPI derivations ──────────────────────────────────────────────────────────
+
 const allSlots             = PROTEIN_GROUPS.flatMap(g => g.slots)
 const constraintViolations = allSlots.filter(s => s.constraintStatus === 'error').length
 const constraintWarnings   = allSlots.filter(s => s.constraintStatus === 'warning').length
 const skuErrors            = allSlots.filter(s => s.skuStatus === 'error').length
 const skuWarnings          = allSlots.filter(s => s.skuStatus === 'warning').length
 const totalSlots           = allSlots.length
-const filledSlots          = totalSlots
 const canSubmit            = constraintViolations === 0 && skuErrors === 0
 
-function slotToStatus(health: SlotHealth): 'success' | 'warning' | 'error' {
-  if (health === 'ok')      return 'success'
-  if (health === 'warning') return 'warning'
-  return 'error'
+function slotToStatus(h: SlotHealth): 'success' | 'warning' | 'error' {
+  return h === 'ok' ? 'success' : h === 'warning' ? 'warning' : 'error'
 }
 
+function deltaColour(dir: 'up' | 'down' | 'neutral') {
+  return dir === 'down' ? semantic.foreground.positive.default.light
+    : dir === 'up'   ? semantic.foreground.negative.default.light
+    : semantic.foreground.default.secondary.light
+}
+
+// ─── MenuSlotCard ─────────────────────────────────────────────────────────────
 // @temporary component:MenuSlotCard reason:no DS card variant for recipe slot with dual-signal layout owner:kat
+
 interface MenuSlotCardProps {
   slot: RecipeSlot
-  onSwap: (slotId: string) => void
+  onSwap: (slot: RecipeSlot) => void
   onViewDetail: (slotId: string) => void
 }
 
@@ -149,13 +186,9 @@ function MenuSlotCard({ slot, onSwap, onViewDetail }: MenuSlotCardProps) {
       tier="raised"
       padding={400}
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: spacing[300],
-        borderLeft: hasError
-          ? `3px solid ${semantic.border.negative.light}`
-          : hasWarning
-          ? `3px solid ${semantic.border.warning.light}`
+        display: 'flex', flexDirection: 'column', gap: spacing[300],
+        borderLeft: hasError   ? `3px solid ${semantic.border.negative.light}`
+          : hasWarning ? `3px solid ${semantic.border.warning.light}`
           : `3px solid transparent`,
       }}
     >
@@ -170,35 +203,164 @@ function MenuSlotCard({ slot, onSwap, onViewDetail }: MenuSlotCardProps) {
         onClick={() => onViewDetail(slot.id)}
         style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline', color: semantic.foreground.default.primary.light }}
       >
-        <BodyText density="compact" weight="semi" style={{ lineHeight: '1.4' }}>
-          {slot.recipeName}
-        </BodyText>
+        <BodyText density="compact" weight="semi" style={{ lineHeight: '1.4' }}>{slot.recipeName}</BodyText>
       </button>
 
       <MetaText emphasis="secondary">{slot.cuisine}</MetaText>
 
       <Stack gap={100}>
         <StatusIndicator status={slotToStatus(slot.constraintStatus)} label={slot.constraintStatus === 'ok' ? 'Constraints met' : slot.constraintNote ?? 'Constraint issue'} />
-        <StatusIndicator status={slotToStatus(slot.skuStatus)}        label={slot.skuStatus === 'ok'        ? 'SKUs healthy'   : slot.skuNote        ?? 'SKU issue'} />
+        <StatusIndicator status={slotToStatus(slot.skuStatus)}        label={slot.skuStatus        === 'ok' ? 'SKUs healthy'   : slot.skuNote        ?? 'SKU issue'} />
       </Stack>
 
-      <Button variant="outline" color="neutral" size="sm" showLeadingIcon leadingIcon={<SwapHorizOutline />} onClick={() => onSwap(slot.id)} style={{ alignSelf: 'flex-start', marginTop: spacing[100] }}>
+      <Button
+        variant="outline" color="neutral" size="sm"
+        showLeadingIcon leadingIcon={<SwapHorizOutline />}
+        onClick={() => onSwap(slot)}
+        style={{ alignSelf: 'flex-start', marginTop: spacing[100] }}
+      >
         Swap
       </Button>
     </Surface>
   )
 }
 
+// ─── RecipePickerSideSheet ────────────────────────────────────────────────────
+
+interface RecipePickerSideSheetProps {
+  open: boolean
+  slot: RecipeSlot | null
+  onClose: () => void
+  onSelect: (candidate: PoolCandidate, slot: RecipeSlot) => void
+}
+
+function RecipePickerSideSheet({ open, slot, onClose, onSelect }: RecipePickerSideSheetProps) {
+  const [search, setSearch] = useState('')
+
+  if (!slot) return null
+
+  const filtered = POOL_CANDIDATES.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.cuisine.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <SideSheet
+      open={open}
+      title="Swap Recipe"
+      subtitle={
+        <MetaText emphasis="tertiary">
+          Replacing: {slot.slotLabel} · {slot.recipeName} · {slot.costPerServing}
+        </MetaText>
+      }
+      showCloseButton
+      onClose={onClose}
+      showActions={false}
+    >
+      <Stack gap={400}>
+        {/* Search */}
+        <InputField
+          placeholder="Search by name or cuisine…"
+          value={search}
+          onChange={setSearch}
+          size="sm"
+          leadingIcon={<SearchOutline />}
+        />
+
+        {/* Candidate count */}
+        <SectionHeader
+          title={`${filtered.length} candidate${filtered.length !== 1 ? 's' : ''}`}
+          level="secondary"
+        />
+
+        {/* Candidate rows */}
+        <Stack gap={300}>
+          {filtered.length === 0 && (
+            <MetaText emphasis="tertiary">No recipes match your search.</MetaText>
+          )}
+          {filtered.map(c => (
+            <Surface
+              key={c.id}
+              tier="raised"
+              padding={400}
+              style={{ display: 'flex', flexDirection: 'column', gap: spacing[300] }}
+            >
+              {/* Name + cost delta */}
+              <Cluster justify="space-between" align="flex-start" wrap={false}>
+                <Stack gap={50}>
+                  <BodyText density="compact" weight="semi">{c.name}</BodyText>
+                  <MetaText emphasis="tertiary">{c.cuisine}</MetaText>
+                </Stack>
+                <Stack gap={50} style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <BodyText density="compact" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {c.costPerServing}
+                  </BodyText>
+                  <MetaText
+                    emphasis={c.costDeltaDir === 'down' ? 'positive' : c.costDeltaDir === 'up' ? 'negative' : 'tertiary'}
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    {c.costDelta} vs current
+                  </MetaText>
+                </Stack>
+              </Cluster>
+
+              {/* Signals */}
+              <Cluster gap={300} wrap>
+                <StatusIndicator
+                  status={c.constraintStatus === 'ok' ? 'success' : c.constraintStatus === 'warning' ? 'warning' : 'error'}
+                  label={c.constraintStatus === 'ok' ? 'Constraints met' : c.constraintNote ?? 'Constraint issue'}
+                />
+                <StatusIndicator
+                  status={c.skuStatus === 'ok' ? 'success' : c.skuStatus === 'warning' ? 'warning' : 'error'}
+                  label={c.skuStatus === 'ok' ? 'SKUs healthy' : c.skuNote ?? 'SKU issue'}
+                />
+              </Cluster>
+
+              {/* Select action */}
+              <Button
+                variant="fill" color="positive" size="sm"
+                onClick={() => onSelect(c, slot)}
+                style={{ alignSelf: 'flex-start' }}
+              >
+                Select
+              </Button>
+            </Surface>
+          ))}
+        </Stack>
+      </Stack>
+    </SideSheet>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function MenuOverviewPage() {
   const router = useRouter()
   const [activeNav, setActiveNav]             = useState('overview')
   const [selectedWeek, setSelectedWeek]       = useState('w28')
   const [selectedCountry, setSelectedCountry] = useState(countryOptions[0].value)
+  const [swapSlot, setSwapSlot]               = useState<RecipeSlot | null>(null)
+  const [swappedSlots, setSwappedSlots]       = useState<Record<string, string>>({})
 
-  function handleSwap(slotId: string)       { console.log('Swap SideSheet for slot:', slotId) }
-  function handleViewDetail(slotId: string) { router.push(`/tools/recipe-pool-picker/recipe/${slotId}`) }
+  function handleSwap(slot: RecipeSlot)       { setSwapSlot(slot) }
+  function handleCloseSheet()                 { setSwapSlot(null) }
+  function handleViewDetail(slotId: string)   { router.push(`/tools/recipe-pool-picker/recipe/${slotId}`) }
+
+  function handleSelectCandidate(candidate: PoolCandidate, slot: RecipeSlot) {
+    setSwappedSlots(prev => ({ ...prev, [slot.id]: candidate.name }))
+    setSwapSlot(null)
+  }
 
   const weekLabel = WEEK_OPTIONS.find(w => w.value === selectedWeek)?.label ?? ''
+
+  // Merge swapped names into slot data for display
+  const proteinGroupsWithSwaps = PROTEIN_GROUPS.map(group => ({
+    ...group,
+    slots: group.slots.map(slot => ({
+      ...slot,
+      recipeName: swappedSlots[slot.id] ?? slot.recipeName,
+    })),
+  }))
 
   return (
     <PageShell
@@ -245,15 +407,15 @@ export default function MenuOverviewPage() {
           <KpiRow>
             <KPIData label="COGS vs target" value={<span style={{ fontVariantNumeric: 'tabular-nums' }}>€4.42 <MetaText emphasis="positive">↓ €0.08</MetaText></span>} />
             <KPIData label="Constraint violations" value={<span style={{ fontVariantNumeric: 'tabular-nums', color: constraintViolations > 0 ? semantic.foreground.negative.default.light : semantic.foreground.positive.default.light }}>{String(constraintViolations)}{constraintWarnings > 0 && <MetaText emphasis="secondary">{` (${constraintWarnings} warnings)`}</MetaText>}</span>} />
-            <KPIData label="SKU issues" value={<span style={{ fontVariantNumeric: 'tabular-nums', color: skuErrors > 0 ? semantic.foreground.negative.default.light : skuWarnings > 0 ? semantic.foreground.warning.default.light : semantic.foreground.positive.default.light }}>{String(skuErrors)}{skuWarnings > 0 && <MetaText emphasis="secondary">{` (${skuWarnings} monitoring)`}</MetaText>}</span>} />
-            <KPIData label="Slot fill rate" value={<span style={{ fontVariantNumeric: 'tabular-nums', color: semantic.foreground.positive.default.light }}>{`${filledSlots}/${totalSlots}`}</span>} />
+            <KPIData label="SKU issues"            value={<span style={{ fontVariantNumeric: 'tabular-nums', color: skuErrors > 0 ? semantic.foreground.negative.default.light : skuWarnings > 0 ? semantic.foreground.warning.default.light : semantic.foreground.positive.default.light }}>{String(skuErrors)}{skuWarnings > 0 && <MetaText emphasis="secondary">{` (${skuWarnings} monitoring)`}</MetaText>}</span>} />
+            <KPIData label="Slot fill rate"        value={<span style={{ fontVariantNumeric: 'tabular-nums', color: semantic.foreground.positive.default.light }}>{`${totalSlots}/${totalSlots}`}</span>} />
           </KpiRow>
 
           {(constraintViolations > 0 || skuErrors > 0) && (
             <Alert alertColour="warning" showTitle title={constraintViolations > 0 ? `${constraintViolations} constraint violation${constraintViolations !== 1 ? 's' : ''} must be resolved before submitting to MPS` : `${skuErrors} SKU issue${skuErrors !== 1 ? 's' : ''} require attention`} showDescription description="Slots with a red or amber left border need action." />
           )}
 
-          {PROTEIN_GROUPS.map((group) => (
+          {proteinGroupsWithSwaps.map((group) => (
             <Section key={group.label} title={group.label} surface="section">
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: spacing[400] }}>
                 {group.slots.map((slot) => (
@@ -264,6 +426,14 @@ export default function MenuOverviewPage() {
           ))}
         </Stack>
       </PageContent>
+
+      {/* Recipe Picker SideSheet */}
+      <RecipePickerSideSheet
+        open={swapSlot !== null}
+        slot={swapSlot}
+        onClose={handleCloseSheet}
+        onSelect={handleSelectCandidate}
+      />
     </PageShell>
   )
 }
