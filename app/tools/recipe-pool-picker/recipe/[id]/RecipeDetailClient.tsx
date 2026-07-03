@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   PageShell, PageContent, PageHeader, PageToolbar,
   Stack, Cluster, Surface, SectionHeader, FieldReadOnly,
@@ -71,7 +72,7 @@ const ingredientColumns: TableColumn[] = [
   { key: 'skuCode', label: 'SKU', width: 140 },
   { key: 'availability', label: 'Availability', width: 110, align: 'right', render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums', color: availabilityColour(v as number) }}>{v as number}%</span> },
   { key: 'capStatus', label: 'Cap status', width: 130, render: (v) => { const s = v as string; return s === 'ok' ? <StatusIndicator status="success" label="Within cap" /> : s === 'monitoring' ? <StatusIndicator status="warning" label="Monitoring" /> : <StatusIndicator status="error" label="Capped" /> } },
-  { key: 'isFlagged', label: 'Action', width: 130, render: (v) => v ? <Button variant="outline" color="negative" size="sm" showLeadingIcon leadingIcon={<ErrorOutline />} onClick={() => { window.location.href = '/tools/recipe-pool-picker/substitution' }}>Fix</Button> : <MetaText emphasis="tertiary">—</MetaText> },
+  { key: 'isFlagged', label: 'Action', width: 130, render: (v) => v ? <Link href="/tools/recipe-pool-picker/substitution" style={{ textDecoration: 'none' }}><Button variant="outline" color="negative" size="sm" showLeadingIcon leadingIcon={<ErrorOutline />}>Fix</Button></Link> : <MetaText emphasis="tertiary">—</MetaText> },
 ]
 
 export default function RecipeDetailClient() {
