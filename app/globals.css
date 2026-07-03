@@ -1,0 +1,449 @@
+@import "tailwindcss";
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ── Agrandir Digital — self-hosted web font ────────────────────────────────
+   Required for Sage headline tokens (typography.scale['headline/*']).
+   File: public/fonts/agrandir/AgrandirDigital-Medium.woff2
+────────────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Agrandir Digital';
+  src: url('/fonts/agrandir/AgrandirDigital-Medium.woff2') format('woff2'),
+       url('/fonts/agrandir/AgrandirDigital-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Satoshi — self-hosted web font ─────────────────────────────────────── */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/satoshi/Satoshi-Regular.woff2') format('woff2'),
+       url('/fonts/satoshi/Satoshi-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/satoshi/Satoshi-Bold.woff2') format('woff2'),
+       url('/fonts/satoshi/Satoshi-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/satoshi/Satoshi-Black.woff2') format('woff2'),
+       url('/fonts/satoshi/Satoshi-Black.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme inline {
+  --font-sans: system-ui, sans-serif;
+  --font-headline: 'Agrandir Digital', system-ui, sans-serif;
+  --font-satoshi: 'Satoshi', system-ui, -apple-system, sans-serif;
+
+  --transition-duration-instant:    0ms;
+  --transition-duration-fast:       100ms;
+  --transition-duration-quick:      150ms;
+  --transition-duration-base:       200ms;
+  --transition-duration-moderate:   300ms;
+  --transition-duration-slow:       400ms;
+  --transition-duration-deliberate: 500ms;
+
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 142 76% 36%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 142 76% 36%;
+  --radius: 0.5rem;
+  --chart-1: 142 76% 36%;
+  --chart-2: 271 81% 56%;
+  --chart-3: 217 91% 60%;
+  --chart-4: 45 93% 47%;
+  --chart-5: 0 84% 60%;
+  --warning: 45 93% 47%;
+  --success: 142 76% 36%;
+  --info: 217 91% 60%;
+
+  --ease-out-standard:    cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-standard:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:          cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+:root {
+  --font-headline: 'Agrandir Digital', system-ui, sans-serif;
+  --font-source-sans-3: 'Satoshi', system-ui, sans-serif;
+}
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: rgb(226 232 240);
+  }
+}
+
+/* Remove hardcoded html/body colors - let Tailwind utilities in layout.tsx control them */
+body {
+  font-family: 'Satoshi', system-ui, sans-serif;
+}
+
+/* ── Page grid background ───────────────────────────────────────────────────── */
+.page-grid {
+  background-color: #ffffff;
+}
+
+.page-grid-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1500px;
+  background-image:
+    linear-gradient(#F5F5F5 1px, transparent 1px),
+    linear-gradient(to right, #F5F5F5 1px, transparent 1px);
+  background-size: 42px 42px;
+  -webkit-mask-image: linear-gradient(to bottom, black 900px, transparent 1500px);
+  mask-image: linear-gradient(to bottom, black 900px, transparent 1500px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+::selection {
+  background: #067A46;
+  color: #FFFFFF;
+}
+
+/* Obsidian Glass Card */
+.obsidian-card {
+  background: rgba(15, 23, 42, 0.40);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.obsidian-card:hover {
+  border-color: rgba(132, 204, 22, 0.25);
+  box-shadow: 0 0 40px -12px rgba(132, 204, 22, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Glow Background Mist */
+.glow-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.glow-bg::before {
+  content: '';
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  top: -350px;
+  left: -250px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.06);
+  filter: blur(150px);
+}
+
+.glow-bg::after {
+  content: '';
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  bottom: -300px;
+  right: -250px;
+  border-radius: 50%;
+  background: rgba(132, 204, 22, 0.04);
+  filter: blur(150px);
+}
+
+/* Scroll Fade */
+.scroll-fade {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+/* Line clamp utility */
+@utility line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@utility line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Button — design token CSS custom properties ─────────────────────────────
+   Single source of truth for all button colours.
+   Values are sourced from lib/tokens.ts — keep both files in sync.
+   Components consume these via Tailwind arbitrary-value syntax:
+     bg-[var(--btn-positive-fill)]  hover:bg-[var(--btn-positive-fill-hover)]
+   Focus ring variables pre-compute the rgba so the /opacity modifier
+   is not needed on the Tailwind class.
+──────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* ─ Light surface ─ */
+  /* Positive */
+  --btn-positive-fill:            #067A46;
+  --btn-positive-fill-hover:      #056835;
+  --btn-positive-fill-active:     #035624;
+  --btn-positive-subtle:          #F6FDE9;
+  --btn-positive-subtle-deep:     #E4FABF;
+  --btn-positive-ring:            rgba(6, 122, 70, 0.4);
+  /* Negative */
+  --btn-negative-fill:            #B30000;
+  --btn-negative-fill-hover:      #970000;
+  --btn-negative-fill-active:     #7C0000;
+  --btn-negative-subtle:          #FFEAE9;
+  --btn-negative-subtle-deep:     #FFCCCA;
+  --btn-negative-ring:            rgba(179, 0, 0, 0.4);
+  /* Neutral */
+  --btn-neutral-fill:             #4B4B4B;
+  --btn-neutral-fill-hover:       #242424;
+  --btn-neutral-fill-active:      #111111;
+  --btn-neutral-border:           #242424;
+  --btn-neutral-subtle:           #E4E4E4;
+  --btn-neutral-subtle-deep:      #BBBBBB;
+  --btn-neutral-ring:             rgba(75, 75, 75, 0.4);
+  /* AI */
+  --btn-ai-fill:                  #6747D2;
+  --btn-ai-fill-hover:            #5236B8;
+  --btn-ai-fill-active:           #2B1E66;
+  --btn-ai-subtle:                #F5F2FF;
+  --btn-ai-subtle-deep:           #E6E0FF;
+  --btn-ai-ring:                  rgba(103, 71, 210, 0.4);
+  /* Disabled — light surface */
+  --btn-disabled-fill-bg:         #BBBBBB;
+  --btn-disabled-border:          #BBBBBB;
+  /* ─ Dark surface ─ */
+  /* Positive */
+  --btn-dk-positive-fill:         #96DC14;
+  --btn-dk-positive-fill-hover:   #D2F895;
+  --btn-dk-positive-text:         #035624;
+  --btn-dk-positive-border:       #96DC14;
+  --btn-dk-positive-subtle:       #035624;
+  --btn-dk-positive-subtle-deep:  #056835;
+  --btn-dk-positive-ring:         rgba(150, 220, 20, 0.4);
+  /* Negative */
+  --btn-dk-negative-fill:         #FE8680;
+  --btn-dk-negative-fill-hover:   #FCAD9A;
+  --btn-dk-negative-text:         #7C0000;
+  --btn-dk-negative-subtle:       #7C0000;
+  --btn-dk-negative-subtle-deep:  #970000;
+  --btn-dk-negative-ring:         rgba(254, 134, 128, 0.4);
+  /* Neutral */
+  --btn-dk-neutral-fill:          #E4E4E4;
+  --btn-dk-neutral-fill-hover:    #BBBBBB;
+  --btn-dk-neutral-fill-active:   #676767;
+  --btn-dk-neutral-text:          #242424;
+  --btn-dk-neutral-text-fg:       #E4E4E4;
+  --btn-dk-neutral-border:        #BBBBBB;
+  --btn-dk-neutral-subtle:        #4B4B4B;
+  --btn-dk-neutral-ring:          rgba(228, 228, 228, 0.4);
+  /* AI */
+  --btn-dk-ai-fill:               #9B8AFF;
+  --btn-dk-ai-fill-active:        #B7ABFF;
+  --btn-dk-ai-text:               #2B1E66;
+  --btn-dk-ai-border:             #9B8AFF;
+  --btn-dk-ai-subtle:             #2B1E66;
+  --btn-dk-ai-subtle-deep:        #5236B8;
+  --btn-dk-ai-ring:               rgba(155, 138, 255, 0.4);
+  /* Disabled — dark surface */
+  --btn-dk-disabled-fill-bg:      #676767;
+  --btn-dk-disabled-text:         #676767;
+  --btn-dk-disabled-outline-bg:   #4B4B4B;
+  /* Focus ring offsets */
+  --btn-ring-offset-light:        #FFFFFF;
+  --btn-ring-offset-dark:         #0B1120;
+  /* Heights (Figma node 44829:5863) */
+  --btn-height-sm:                32px;
+  --btn-height-md:                40px;
+  --btn-height-lg:                48px;
+}
+
+/* DS focus ring for inputs — keyboard only, not mouse clicks */
+input:focus,
+select:focus {
+  outline: none;
+}
+input:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: rgba(6, 122, 70, 0.5);
+  box-shadow: 0 0 0 2px rgba(6, 122, 70, 0.15);
+}
+
+/* Linear progress — indeterminate sliding bar */
+@keyframes progress-indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* ── Slider (Enterprise DS v3) ──────────────────────────────────────────────── */
+
+.eds-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  /* Override browser/OS accent colour so no blue leaks through on any natively-rendered part */
+  accent-color: var(--Background-Dark-Positive-Positive-mid, #067A46);
+  background: transparent;
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
+
+/* Remove browser default tracks */
+.eds-slider::-webkit-slider-runnable-track { background: transparent; height: 0; }
+.eds-slider::-moz-range-track              { background: transparent; height: 0; border: none; }
+
+/* Firefox filled-track segment — not styled above, defaults to browser-accent blue without this */
+.eds-slider::-moz-range-progress {
+  background: var(--Background-Dark-Positive-Positive-mid, #067A46);
+  height: var(--slider-track-h, 4px);
+  border-radius: 9999px;
+}
+.eds-slider:disabled::-moz-range-progress { background: #BBBBBB; }
+
+/* ─ Thumb: default ─ */
+.eds-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width:         var(--slider-thumb-size, 16px);
+  height:        var(--slider-thumb-size, 16px);
+  border-radius: calc(var(--slider-thumb-size, 16px) / 2);
+  background:    var(--slider-thumb-bg, #ffffff);
+  border:        2px solid var(--slider-thumb-border, #067A46);
+  box-shadow:    0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor:        pointer;
+  transition:    width 0.2s ease,
+                 box-shadow 0.1s ease, background 0.1s ease, border-color 0.1s ease;
+  position: relative;
+  z-index: 1;
+  /* Webkit positions the thumb flush with the top of the (0-height) track.
+     Pull it up by half its own height so it sits centred on the track line. */
+  margin-top: calc(var(--slider-thumb-size, 16px) / -2);
+}
+.eds-slider::-moz-range-thumb {
+  width:         var(--slider-thumb-size, 16px);
+  height:        var(--slider-thumb-size, 16px);
+  border-radius: calc(var(--slider-thumb-size, 16px) / 2);
+  background:    var(--slider-thumb-bg, #ffffff);
+  border:        2px solid var(--slider-thumb-border, #067A46);
+  box-shadow:    0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor:        pointer;
+  transition:    width 0.2s ease, box-shadow 0.1s ease;
+}
+
+/* ─ Thumb: hover ─ */
+/* Width doubles to 2× thumb size; border-radius stays fixed so corners stay
+   perfectly round — producing a true pill (not an oval from transform scaling). */
+.eds-slider:not(:disabled):hover::-webkit-slider-thumb {
+  width:        calc(var(--slider-thumb-size, 16px) * 2);
+  background:   var(--slider-thumb-pill-bg, #00A846);
+  border-color: transparent;
+  box-shadow:   0 0 0 8px var(--hf-primary-hover-highlight-primary-30050, rgba(210, 248, 149, 0.50));
+}
+.eds-slider:not(:disabled):hover::-moz-range-thumb {
+  width:        calc(var(--slider-thumb-size, 16px) * 2);
+  background:   var(--slider-thumb-pill-bg, #00A846);
+  border-color: transparent;
+  box-shadow:   0 0 0 8px var(--hf-primary-hover-highlight-primary-30050, rgba(210, 248, 149, 0.50));
+}
+
+/* ─ Thumb: active / dragging ─ */
+.eds-slider:not(:disabled):active::-webkit-slider-thumb {
+  background:   var(--slider-thumb-pill-bg, #00A846);
+  border-color: transparent;
+  width:        calc(var(--slider-thumb-size, 16px) * 2);
+  box-shadow:   0 0 0 8px var(--hf-primary-hover-highlight-primary-30050, rgba(210, 248, 149, 0.50));
+}
+.eds-slider:not(:disabled):active::-moz-range-thumb {
+  background:   var(--slider-thumb-pill-bg, #00A846);
+  border-color: transparent;
+  width:        calc(var(--slider-thumb-size, 16px) * 2);
+  box-shadow:   0 0 0 8px var(--hf-primary-hover-highlight-primary-30050, rgba(210, 248, 149, 0.50));
+}
+
+/* ─ Thumb: focus-visible ─ */
+.eds-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--slider-focus-ring, rgba(6, 122, 70, 0.4));
+}
+.eds-slider:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px var(--slider-focus-ring, rgba(6, 122, 70, 0.4));
+}
+
+/* ─ Disabled ─ */
+.eds-slider:disabled                        { cursor: not-allowed; }
+.eds-slider:disabled::-webkit-slider-thumb  { cursor: not-allowed; }
+.eds-slider:disabled::-moz-range-thumb      { cursor: not-allowed; }
+
+/* ── Rating (Enterprise DS v3) ──────────────────────────────────────────────── */
+
+@keyframes ratingBurstParticle {
+  0%   { transform: translate(-50%, -50%) translate(0px, 0px) scale(1);   opacity: 1; }
+  60%  { opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+@keyframes ratingStarSpring {
+  0%   { transform: scale(1);    }
+  22%  { transform: scale(1.45); }
+  44%  { transform: scale(0.82); }
+  62%  { transform: scale(1.18); }
+  78%  { transform: scale(0.94); }
+  90%  { transform: scale(1.05); }
+  100% { transform: scale(1);    }
+}
+
+@keyframes emojiEyeBlink {
+  0%, 100% { transform: scaleY(1);    }
+  35%, 60% { transform: scaleY(0.06); }
+}
+
+@keyframes emojiEyeWink {
+  0%, 72%, 100% { transform: scaleY(1);    }
+  77%           { transform: scaleY(0.06); }
+  86%           { transform: scaleY(1);    }
+}
+
+/* ── Rich TextArea (Enterprise DS v3) ───────────────────────────────────────── */
+/* Placeholder color driven by --ta-ph custom property set inline on the element */
+[role="textbox"][data-placeholder]:empty::before {
+  color: var(--ta-ph, #9B9B9B);
+}

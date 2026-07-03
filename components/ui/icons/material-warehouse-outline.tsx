@@ -1,0 +1,9 @@
+import { IconRoot, IconProps } from './icon'
+
+export function WarehouseOutline(props: IconProps) {
+  return (
+    <IconRoot {...props}>
+      <path d="M4 19H6V11H18V19H20V8.35L12 5.15L4 8.35V19ZM2 21V7L12 3L22 7V21H16V13H8V21H2ZM9 21V19H11V21H9ZM11 18V16H13V18H11ZM13 21V19H15V21H13Z" fill="currentColor"/>
+    </IconRoot>
+  )
+}

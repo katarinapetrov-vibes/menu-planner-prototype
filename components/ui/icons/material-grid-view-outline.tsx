@@ -1,0 +1,9 @@
+import { IconRoot, IconProps } from './icon'
+
+export function GridViewOutline(props: IconProps) {
+  return (
+    <IconRoot {...props}>
+      <path d="M3 11V3H11V11H3ZM3 21V13H11V21H3ZM13 11V3H21V11H13ZM13 21V13H21V21H13ZM5 9H9V5H5V9ZM15 9H19V5H15V9ZM15 19H19V15H15V19ZM5 19H9V15H5V19Z" fill="currentColor"/>
+    </IconRoot>
+  )
+}

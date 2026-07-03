@@ -1,0 +1,9 @@
+import { IconRoot, IconProps } from './icon'
+
+export function VerifiedUserFilled(props: IconProps) {
+  return (
+    <IconRoot {...props}>
+      <path d="M10.95 15.55L16.6 9.9L15.175 8.475L10.95 12.7L8.85 10.6L7.425 12.025L10.95 15.55ZM12 22C9.68333 21.4167 7.77083 20.0875 6.2625 18.0125C4.75417 15.9375 4 13.6333 4 11.1V5L12 2L20 5V11.1C20 13.6333 19.2458 15.9375 17.7375 18.0125C16.2292 20.0875 14.3167 21.4167 12 22Z" fill="currentColor"/>
+    </IconRoot>
+  )
+}
